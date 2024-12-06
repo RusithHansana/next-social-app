@@ -6,7 +6,16 @@ export async function getCurrentUser() {
 
   if (!userId) throw new Error("Please log in to continue");
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  const user = await prisma.user.findUnique({
+    where: { clerkId: userId },
+    include: {
+      _count: {
+        select: {
+          followers: true,
+        },
+      },
+    },
+  });
 
   if (!user) throw new Error("User not found");
 
