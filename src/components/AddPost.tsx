@@ -1,7 +1,29 @@
+import prisma from "@/lib/client";
+import { getCurrentUser } from "@/lib/getCurrentUser";
 import Image from "next/image";
 import React from "react";
 
 const AddPost = () => {
+  const addPost = async (formData: FormData) => {
+    "use server";
+    const user = await getCurrentUser();
+    const desc = formData.get("desc") as string;
+    try {
+      const post = await prisma.post.create({
+        data: {
+          userId: user.id,
+          description: desc,
+        },
+      });
+
+      if (!post) throw new Error("Post creation failed");
+
+      console.log("Post created successfully");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="p-4 bg-white shadow-md rounded-lg flex gap-4 justify-between text-sm">
       {/* AVATAR */}
@@ -15,10 +37,10 @@ const AddPost = () => {
       {/* POST */}
       <div className="flex-1">
         {/* TEXT INPUT */}
-        <div className="flex gap-4">
+        <form action={addPost} className="flex gap-4">
           <textarea
-            name=""
-            id=""
+            name="desc"
+            id="desc"
             placeholder="What's on your mind?"
             className="flex-1 bg-slate-100 rounded-lg p-2"
           ></textarea>
@@ -29,7 +51,10 @@ const AddPost = () => {
             height={20}
             className="w-5 h-5 cursor-pointer self-end"
           />
-        </div>
+          <button className="p-1 text-white text-xs bg-blue-500 rounded-md">
+            Post
+          </button>
+        </form>
         {/* POST OPTIONS */}
         <div className="flex items-center gap-4 mt-4 text-gray-400 flex-wrap">
           <div className="flex items-center gap-2 cursor-pointer">
