@@ -12,6 +12,8 @@ export async function getCurrentUser() {
       _count: {
         select: {
           followers: true,
+          followings: true,
+          posts: true,
         },
       },
     },
