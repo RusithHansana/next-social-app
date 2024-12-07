@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import prisma from "./client";
 import { getCurrentUser } from "./getCurrentUser";
 
@@ -130,5 +131,42 @@ export const handleDeclineRequest = async (userId: string) => {
   } catch (error) {
     console.log(error);
     throw new Error("Something Went Wrong!");
+  }
+};
+
+export const updateProfile = async (formData: FormData, cover: string) => {
+  const currentUser = await getCurrentUser();
+
+  const fields = Object.fromEntries(formData);
+
+  const filtereFields = Object.fromEntries(
+    Object.entries(fields).filter(([_, value]) => value !== "")
+  );
+
+  const Profile = z.object({
+    cover: z.string().optional(),
+    name: z.string().max(60).optional(),
+    surname: z.string().max(60).optional(),
+    description: z.string().max(255).optional(),
+    city: z.string().max(60).optional(),
+    school: z.string().max(60).optional(),
+    work: z.string().max(60).optional(),
+    website: z.string().max(60).optional(),
+  });
+
+  const validatedFields = Profile.safeParse({ cover, ...filtereFields });
+
+  if (validatedFields.error)
+    console.log(validatedFields.error.flatten().fieldErrors);
+
+  try {
+    await prisma.user.update({
+      where: {
+        id: currentUser.id,
+      },
+      data: validatedFields.data,
+    });
+  } catch (error) {
+    console.log(error);
   }
 };
