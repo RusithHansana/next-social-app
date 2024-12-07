@@ -54,7 +54,7 @@ const Profile = async () => {
           </div>
           <span className="text-gray-500 text-xs">
             {" "}
-            {user._count.followers} Followers
+            {user._count.followings} Followers
           </span>
         </div>
         <Link

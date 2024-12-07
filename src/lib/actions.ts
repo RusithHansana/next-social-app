@@ -79,3 +79,56 @@ export const handleBlockSwitch = async (userId: string) => {
     throw new Error("Something Went Wrong!");
   }
 };
+
+export const handleFollowRequest = async (userId: string) => {
+  const currentUser = await getCurrentUser();
+
+  try {
+    const existingRequest = await prisma.followRequest.findFirst({
+      where: {
+        senderId: userId,
+        recieverId: currentUser.id,
+      },
+    });
+
+    if (existingRequest)
+      await prisma.followRequest.delete({
+        where: {
+          id: existingRequest.id,
+        },
+      });
+
+    await prisma.follower.create({
+      data: {
+        followerId: userId,
+        followingId: currentUser.id,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    throw new Error("Something Went Wrong!");
+  }
+};
+
+export const handleDeclineRequest = async (userId: string) => {
+  const currentUser = await getCurrentUser();
+
+  try {
+    const existingRequest = await prisma.followRequest.findFirst({
+      where: {
+        senderId: userId,
+        recieverId: currentUser.id,
+      },
+    });
+
+    if (existingRequest)
+      await prisma.followRequest.delete({
+        where: {
+          id: existingRequest.id,
+        },
+      });
+  } catch (error) {
+    console.log(error);
+    throw new Error("Something Went Wrong!");
+  }
+};
