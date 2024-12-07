@@ -1,10 +1,10 @@
 import { getCurrentUser } from "@/lib/getCurrentUser";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 const Profile = async () => {
   const user = await getCurrentUser();
-  console.log(user);
   return (
     <div className="p-4 bg-white rounded-lg shadow-md text-sm flex flex-col gap-6">
       <div className="h-20 relative">
@@ -57,9 +57,12 @@ const Profile = async () => {
             {user._count.followers} Followers
           </span>
         </div>
-        <button className="bg-blue-500 text-white text-xs rounded-md p-2">
+        <Link
+          href={`/profile/${user.username}`}
+          className="bg-blue-500 text-white text-xs rounded-md p-2"
+        >
           My Profile
-        </button>
+        </Link>
       </div>
     </div>
   );
