@@ -1,9 +1,12 @@
+import prisma from "@/lib/client";
+import { getCurrentUser } from "@/lib/getCurrentUser";
 import { User } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import UserInfoCardInteraction from "./UserInfoCardInteraction";
 
-const UserInfoCard = ({ user }: { user: User }) => {
+const UserInfoCard = async ({ user }: { user: User }) => {
   const createdAtDate = new Date(user.createAt);
 
   const formattedDate = createdAtDate.toLocaleString("en-US", {
@@ -11,6 +14,41 @@ const UserInfoCard = ({ user }: { user: User }) => {
     month: "long",
     year: "numeric",
   });
+
+  let isUserBlocked = false;
+  let isFollwing = false;
+  let isFollowingSent = false;
+
+  const currentUser = await getCurrentUser();
+
+  if (currentUser) {
+    const blockRes = await prisma.block.findFirst({
+      where: {
+        blockerId: currentUser.id,
+        blockedId: user.id,
+      },
+    });
+
+    blockRes && (isUserBlocked = true);
+
+    const followRes = await prisma.follower.findFirst({
+      where: {
+        followerId: currentUser.id,
+        followingId: user.id,
+      },
+    });
+
+    followRes && (isFollwing = true);
+
+    const followRequest = await prisma.followRequest.findFirst({
+      where: {
+        senderId: currentUser.id,
+        recieverId: user.id,
+      },
+    });
+
+    followRequest && (isFollowingSent = true);
+  }
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md text-sm flex flex-col gap-4">
@@ -70,12 +108,13 @@ const UserInfoCard = ({ user }: { user: User }) => {
             <span>Joined {formattedDate}</span>
           </div>
         </div>
-        <button className="bg-blue-500 text-white text-sm rounded-md p-2">
-          Follow
-        </button>
-        <span className="text-red-500 self-end text-xs cursor-pointer">
-          Block User
-        </span>
+        <UserInfoCardInteraction
+          userId={user.id}
+          currentUserId={currentUser.id}
+          isUserBlocked={isUserBlocked}
+          isFollowing={isFollwing}
+          isFollowingSent={isFollowingSent}
+        />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import AddPost from "@/components/AddPost";
-import LeftMenu from "@/components/LeftMenu";
-import PostFeed from "@/components/PostFeed";
-import RightMenu from "@/components/RightMenu";
+import LeftMenu from "@/components/left-menu/LeftMenu";
+import PostFeed from "@/components/feed/PostFeed";
+import RightMenu from "@/components/right-menu/RightMenu";
 import Stories from "@/components/Stories";
 
 const Homepage = () => {

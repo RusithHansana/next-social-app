@@ -1,11 +1,11 @@
-import LeftMenu from "@/components/LeftMenu";
-import PostFeed from "@/components/PostFeed";
-import RightMenu from "@/components/RightMenu";
+import React from "react";
 import prisma from "@/lib/client";
 import { getCurrentUser } from "@/lib/getCurrentUser";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import React from "react";
+import LeftMenu from "@/components/left-menu/LeftMenu";
+import PostFeed from "@/components/feed/PostFeed";
+import RightMenu from "@/components/right-menu/RightMenu";
 
 const ProfilePage = async ({ params }: { params: { username: string } }) => {
   const { username } = params;

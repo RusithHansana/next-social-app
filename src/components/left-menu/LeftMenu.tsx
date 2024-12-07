@@ -1,5 +1,5 @@
 import React from "react";
-import Advertisements from "./Advertisements";
+import Advertisements from "../Advertisements";
 import Profile from "./Profile";
 import Link from "next/link";
 import Image from "next/image";
