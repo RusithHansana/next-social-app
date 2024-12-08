@@ -134,10 +134,17 @@ export const handleDeclineRequest = async (userId: string) => {
   }
 };
 
-export const updateProfile = async (formData: FormData, cover: string) => {
+export const updateProfile = async (
+  prevState: { success: boolean; error: boolean },
+  payload: { formData: FormData; cover: string }
+) => {
+  const { formData, cover } = payload;
+
   const currentUser = await getCurrentUser();
 
-  const fields = Object.fromEntries(formData);
+  if (!currentUser) return { success: false, error: true };
+
+  const fields = { ...Object.fromEntries(formData), cover };
 
   const filtereFields = Object.fromEntries(
     Object.entries(fields).filter(([_, value]) => value !== "")
@@ -154,10 +161,12 @@ export const updateProfile = async (formData: FormData, cover: string) => {
     website: z.string().max(60).optional(),
   });
 
-  const validatedFields = Profile.safeParse({ cover, ...filtereFields });
+  const validatedFields = Profile.safeParse(filtereFields);
 
-  if (validatedFields.error)
+  if (validatedFields.error) {
     console.log(validatedFields.error.flatten().fieldErrors);
+    return { success: false, error: true };
+  }
 
   try {
     await prisma.user.update({
@@ -166,6 +175,8 @@ export const updateProfile = async (formData: FormData, cover: string) => {
       },
       data: validatedFields.data,
     });
+
+    return { success: true, error: false };
   } catch (error) {
     console.log(error);
   }

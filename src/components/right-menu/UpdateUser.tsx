@@ -4,11 +4,16 @@ import { updateProfile } from "@/lib/actions";
 import { User } from "@prisma/client";
 import { CldUploadWidget } from "next-cloudinary";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useActionState, useState } from "react";
 
 const UpdateUser = ({ user }: { user: User }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [cover, setCover] = useState<any>();
+
+  const [state, formAction] = useActionState(updateProfile, {
+    success: false,
+    error: false,
+  });
 
   const handleClose = () => {
     setIsOpen(false);
@@ -25,7 +30,9 @@ const UpdateUser = ({ user }: { user: User }) => {
       {isOpen && (
         <div className="absolute w-screen h-screen top-0 left-0 bg-black bg-opacity-65 flex items-center justify-center z-50">
           <form
-            action={(formData) => updateProfile(formData, cover.secure_url)}
+            action={(formData) =>
+              formAction({ formData, cover: cover?.secure_url || "" })
+            }
             className="p-12 bg-white rounded-lg shadow-md flex flex-col gap-2 w-full md:w-1/2 xl:w-1/3 relative"
           >
             {/* TITLE */}
@@ -144,6 +151,10 @@ const UpdateUser = ({ user }: { user: User }) => {
             <button className="bg-blue-500 text-white rounded-md p-2">
               Update
             </button>
+            {state.success && (
+              <span className="text-green-500">Profile has been updated</span>
+            )}
+            {state.error && <span className="text-red-500">Update Failed</span>}
             <div
               className="absolute text-xl right-4 top-3 cursor-pointer"
               onClick={handleClose}
