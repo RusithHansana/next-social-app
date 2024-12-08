@@ -4,6 +4,7 @@ import { updateProfile } from "@/lib/actions";
 import { User } from "@prisma/client";
 import { CldUploadWidget } from "next-cloudinary";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React, { useActionState, useState } from "react";
 
 const UpdateUser = ({ user }: { user: User }) => {
@@ -15,8 +16,11 @@ const UpdateUser = ({ user }: { user: User }) => {
     error: false,
   });
 
+  const router = useRouter();
+
   const handleClose = () => {
     setIsOpen(false);
+    state.success && router.refresh();
   };
 
   return (
