@@ -6,6 +6,7 @@ import { CldUploadWidget } from "next-cloudinary";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useActionState, useState } from "react";
+import UpdateButton from "./UpdateButton";
 
 const UpdateUser = ({ user }: { user: User }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -152,9 +153,7 @@ const UpdateUser = ({ user }: { user: User }) => {
                 />
               </div>
             </div>
-            <button className="bg-blue-500 text-white rounded-md p-2">
-              Update
-            </button>
+            <UpdateButton />
             {state.success && (
               <span className="text-green-500">Profile has been updated</span>
             )}
