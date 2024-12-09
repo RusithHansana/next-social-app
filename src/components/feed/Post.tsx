@@ -52,7 +52,7 @@ const Post = async ({ post }: { post: PostType }) => {
         likes={post.likes}
         commentNumber={post._count.comments}
       />
-      <Comments />
+      <Comments postId={post.id} />
     </div>
   );
 };

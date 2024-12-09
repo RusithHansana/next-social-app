@@ -212,3 +212,25 @@ export const handleLike = async (postId: string) => {
     throw new Error("Something Went Wrong!");
   }
 };
+
+export const handleAddComment = async (postId: string, description: string) => {
+  const currentUser = await getCurrentUser();
+
+  try {
+    const createdComment = await prisma.comment.create({
+      data: {
+        description,
+        postId,
+        userId: currentUser.id,
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    return createdComment;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Something Went Wrong!");
+  }
+};
