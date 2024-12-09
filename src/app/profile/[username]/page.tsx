@@ -89,7 +89,7 @@ const ProfilePage = async ({ params }: { params: { username: string } }) => {
               </div>
             </div>
           </div>
-          <PostFeed />
+          <PostFeed username={user.username} />
         </div>
       </div>
       {/* RIGHT */}

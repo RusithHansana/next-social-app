@@ -181,3 +181,34 @@ export const updateProfile = async (
     console.log(error);
   }
 };
+
+export const handleLike = async (postId: string) => {
+  const currentUser = await getCurrentUser();
+
+  try {
+    const existingLike = await prisma.like.findFirst({
+      where: {
+        postId,
+        userId: currentUser.id,
+      },
+    });
+
+    if (existingLike) {
+      await prisma.like.delete({
+        where: {
+          id: existingLike.id,
+        },
+      });
+    } else {
+      await prisma.like.create({
+        data: {
+          userId: currentUser.id,
+          postId,
+        },
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    throw new Error("Something Went Wrong!");
+  }
+};
