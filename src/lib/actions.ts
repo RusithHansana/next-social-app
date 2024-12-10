@@ -3,6 +3,7 @@
 import { z } from "zod";
 import prisma from "./client";
 import { getCurrentUser } from "./getCurrentUser";
+import { revalidatePath } from "next/cache";
 
 export const handleFollowSwitch = async (userId: string) => {
   const currentUser = await getCurrentUser();
@@ -232,5 +233,36 @@ export const handleAddComment = async (postId: string, description: string) => {
   } catch (error) {
     console.log(error);
     throw new Error("Something Went Wrong!");
+  }
+};
+
+export const handleAddPost = async (formData: FormData, image: string) => {
+  const desc = formData.get("desc") as string;
+
+  const Desc = z.string().min(1).max(255);
+
+  const validatedDesc = Desc.safeParse(desc);
+
+  if (validatedDesc.error) {
+    console.log(validatedDesc.error.flatten().fieldErrors);
+    return;
+  }
+
+  if (!desc) return;
+
+  const currentUser = await getCurrentUser();
+
+  try {
+    await prisma.post.create({
+      data: {
+        description: validatedDesc.data,
+        userId: currentUser.id,
+        img: image,
+      },
+    });
+
+    revalidatePath("/");
+  } catch (error) {
+    console.log(error);
   }
 };

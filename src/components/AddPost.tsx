@@ -1,34 +1,25 @@
-import prisma from "@/lib/client";
-import { getCurrentUser } from "@/lib/getCurrentUser";
+"use client";
+
+import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
+import LoadingSpinner from "./LoadingSpinner";
+import { CldUploadWidget } from "next-cloudinary";
+import AddPostButton from "./AddPostButton";
+import { handleAddPost } from "@/lib/actions";
 
 const AddPost = () => {
-  const addPost = async (formData: FormData) => {
-    "use server";
-    const user = await getCurrentUser();
-    const desc = formData.get("desc") as string;
-    try {
-      const post = await prisma.post.create({
-        data: {
-          userId: user.id,
-          description: desc,
-        },
-      });
+  const { user, isLoaded } = useUser();
+  const [desc, setDesc] = useState("");
+  const [image, setImage] = useState<any>();
 
-      if (!post) throw new Error("Post creation failed");
-
-      console.log("Post created successfully");
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  if (!isLoaded) return <LoadingSpinner type="primary" />;
 
   return (
     <div className="p-4 bg-white shadow-md rounded-lg flex gap-4 justify-between text-sm">
       {/* AVATAR */}
       <Image
-        src="https://picsum.photos/id/64/200/300"
+        src={user?.imageUrl || "/noAvatar.png"}
         alt="profile"
         width={48}
         height={48}
@@ -37,36 +28,55 @@ const AddPost = () => {
       {/* POST */}
       <div className="flex-1">
         {/* TEXT INPUT */}
-        <form action={addPost} className="flex gap-4">
+        <form
+          action={(formData) =>
+            handleAddPost(formData, image?.secure_url || "")
+          }
+          className="flex gap-4"
+        >
           <textarea
             name="desc"
             id="desc"
             placeholder="What's on your mind?"
             className="flex-1 bg-slate-100 rounded-lg p-2"
+            onChange={(e) => setDesc(e.target.value)}
           ></textarea>
-          <Image
-            src="/emoji.png"
-            alt="emoji"
-            width={20}
-            height={20}
-            className="w-5 h-5 cursor-pointer self-end"
-          />
-          <button className="p-1 text-white text-xs bg-blue-500 rounded-md">
-            Post
-          </button>
-        </form>
-        {/* POST OPTIONS */}
-        <div className="flex items-center gap-4 mt-4 text-gray-400 flex-wrap">
-          <div className="flex items-center gap-2 cursor-pointer">
+          <div className="">
             <Image
-              src="/addimage.png"
-              alt="add photo"
+              src="/emoji.png"
+              alt="emoji"
               width={20}
               height={20}
               className="w-5 h-5 cursor-pointer self-end"
             />
-            Photo
+            <AddPostButton />
           </div>
+        </form>
+        {/* POST OPTIONS */}
+        <div className="flex items-center gap-4 mt-4 text-gray-400 flex-wrap">
+          <CldUploadWidget
+            uploadPreset="Social-App"
+            onSuccess={(result, { widget }) => {
+              setImage(result.info);
+              widget.close();
+            }}
+          >
+            {({ open }) => (
+              <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => open()}
+              >
+                <Image
+                  src="/addimage.png"
+                  alt="add photo"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 cursor-pointer self-end"
+                />
+                Photo
+              </div>
+            )}
+          </CldUploadWidget>
           <div className="flex items-center gap-2 cursor-pointer">
             <Image
               src="/addVideo.png"
