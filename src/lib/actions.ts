@@ -5,9 +5,9 @@ import prisma from "./client";
 import { getCurrentUser } from "./getCurrentUser";
 import { revalidatePath } from "next/cache";
 
-export const handleFollowSwitch = async (userId: string) => {
-  const currentUser = await getCurrentUser();
+const currentUser = await getCurrentUser();
 
+export const handleFollowSwitch = async (userId: string) => {
   try {
     const existingFollow = await prisma.follower.findFirst({
       where: {
@@ -52,8 +52,6 @@ export const handleFollowSwitch = async (userId: string) => {
 };
 
 export const handleBlockSwitch = async (userId: string) => {
-  const currentUser = await getCurrentUser();
-
   try {
     const existingBlock = await prisma.block.findFirst({
       where: {
@@ -83,8 +81,6 @@ export const handleBlockSwitch = async (userId: string) => {
 };
 
 export const handleFollowRequest = async (userId: string) => {
-  const currentUser = await getCurrentUser();
-
   try {
     const existingRequest = await prisma.followRequest.findFirst({
       where: {
@@ -113,8 +109,6 @@ export const handleFollowRequest = async (userId: string) => {
 };
 
 export const handleDeclineRequest = async (userId: string) => {
-  const currentUser = await getCurrentUser();
-
   try {
     const existingRequest = await prisma.followRequest.findFirst({
       where: {
@@ -140,8 +134,6 @@ export const updateProfile = async (
   payload: { formData: FormData; cover: string }
 ) => {
   const { formData, cover } = payload;
-
-  const currentUser = await getCurrentUser();
 
   if (!currentUser) return { success: false, error: true };
 
@@ -184,8 +176,6 @@ export const updateProfile = async (
 };
 
 export const handleLike = async (postId: string) => {
-  const currentUser = await getCurrentUser();
-
   try {
     const existingLike = await prisma.like.findFirst({
       where: {
@@ -215,8 +205,6 @@ export const handleLike = async (postId: string) => {
 };
 
 export const handleAddComment = async (postId: string, description: string) => {
-  const currentUser = await getCurrentUser();
-
   try {
     const createdComment = await prisma.comment.create({
       data: {
@@ -250,8 +238,6 @@ export const handleAddPost = async (formData: FormData, image: string) => {
 
   if (!desc) return;
 
-  const currentUser = await getCurrentUser();
-
   try {
     await prisma.post.create({
       data: {
@@ -264,5 +250,38 @@ export const handleAddPost = async (formData: FormData, image: string) => {
     revalidatePath("/");
   } catch (error) {
     console.log(error);
+  }
+};
+
+export const handleAddStory = async (image: string) => {
+  try {
+    const existingStory = await prisma.story.findFirst({
+      where: {
+        userId: currentUser.id,
+      },
+    });
+
+    if (existingStory)
+      await prisma.story.delete({
+        where: {
+          id: existingStory.id,
+        },
+      });
+
+    const createdStory = await prisma.story.create({
+      data: {
+        userId: currentUser.id,
+        img: image,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    return createdStory;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Something Went Wrong!");
   }
 };
