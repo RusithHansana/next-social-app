@@ -1,9 +1,11 @@
 import Image from "next/image";
-import React from "react";
+import React, { Suspense } from "react";
 import Comments from "./Comments";
 import { Post as TPost, User } from "@prisma/client";
 import PostInteraction from "./PostInteraction";
 import { getCurrentUser } from "@/lib/getCurrentUser";
+import LoadingSpinner from "../LoadingSpinner";
+import PostInfo from "./PostInfo";
 
 type PostType = TPost & { user: User } & { likes: [userId: string] } & {
   _count: { comments: number };
@@ -29,7 +31,7 @@ const Post = async ({ post }: { post: PostType }) => {
               : post.user.username}
           </span>
         </div>
-        <Image src="/more.png" alt="profile" width={16} height={16} />
+        {currentUser.id === post.userId && <PostInfo postId={post.id} />}
       </div>
       {/* DESCRIPTION */}
       <div className="flex flex-col gap-4">
@@ -45,14 +47,18 @@ const Post = async ({ post }: { post: PostType }) => {
           </div>
         )}
       </div>
-      {/* INTERACTION */}
-      <PostInteraction
-        currentUserId={currentUser.id}
-        postId={post.id}
-        likes={post.likes}
-        commentNumber={post._count.comments}
-      />
-      <Comments postId={post.id} />
+      <Suspense fallback={<LoadingSpinner type="primary" />}>
+        {/* INTERACTION */}
+        <PostInteraction
+          currentUserId={currentUser.id}
+          postId={post.id}
+          likes={post.likes}
+          commentNumber={post._count.comments}
+        />
+      </Suspense>
+      <Suspense fallback={<LoadingSpinner type="primary" />}>
+        <Comments postId={post.id} />
+      </Suspense>
     </div>
   );
 };

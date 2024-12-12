@@ -285,3 +285,19 @@ export const handleAddStory = async (image: string) => {
     throw new Error("Something Went Wrong!");
   }
 };
+
+export const handleDeletePost = async (postId: string) => {
+  try {
+    await prisma.post.delete({
+      where: {
+        id: postId,
+        userId: currentUser.id,
+      },
+    });
+
+    revalidatePath("/");
+  } catch (error) {
+    console.log(error);
+    throw new Error("Something Went Wrong!");
+  }
+};
